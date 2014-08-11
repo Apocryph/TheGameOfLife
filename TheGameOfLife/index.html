@@ -1,15 +1,43 @@
 ﻿<!DOCTYPE html>
 
 <html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <title>TypeScript HTML App</title>
-    <link rel="stylesheet" href="app.css" type="text/css" />
-    <script src="app.js"></script>
-</head>
-<body>
-    <canvas id="gameCanvas">
-        Your browser is not compatible with HTML5 Canvas.
-    </canvas>
-</body>
+    <head>
+        <meta charset="utf-8" />
+        <title>Conway's Game of Life</title>
+        <link rel="stylesheet" href="app.css" type="text/css" />
+        <script src="app.js"></script>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td colspan ="4">
+                    <canvas id="gameCanvas" width="1600" height="800">
+                        Your browser is not compatible with HTML5 Canvas.
+                    </canvas>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <form>
+                        Speed: <input type="text" name="speed" id="txtSpeed" value="10" />
+                    </form>
+                </td>
+                <td>
+                    <button type="button" id="btnStartStop">
+                        Start
+                    </button>
+                </td>
+                <td>
+                    <button type="button" id="btnStep">
+                        Step
+                    </button>
+                </td>
+                <td>
+                    <button type="button" id="btnReset">
+                        Reset
+                    </button>
+                </td>
+            </tr>
+        </table>
+    </body>
 </html>

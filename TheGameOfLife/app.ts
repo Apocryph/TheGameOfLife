@@ -16,7 +16,7 @@
         }
     }
 
-    advance() {
+    update() {
         for (var i = 0; i < this.height; i++) {
             for (var j = 0; j < this.width; j++) {
                 this.processIndex(i, j);
@@ -25,18 +25,15 @@
         this.currGridOne = !this.currGridOne;
     }
 
-    processIndex(i: number, j: number) {
-        //These are a test
+    private processIndex(i: number, j: number) {
         if (this.currGridOne) {
-            //this.gridTwo[i][j] = !this.gridOne[i][j];
             this.gridTwo[i][j] = this.getNewCellState(i, j);
         } else {
-            //this.gridOne[i][j] = !this.gridTwo[i][j];
             this.gridOne[i][j] = this.getNewCellState(i, j);
         }
     }
 
-    getNewCellState(i: number, j: number): boolean{
+    private getNewCellState(i: number, j: number): boolean{
         var sumOfNeighbors: number = this.sumNeighborsOf(i, j);
         if ((this.currGridOne && this.gridOne[i][j]) || (!this.currGridOne && this.gridTwo[i][j])) //current cell is alive
             return sumOfNeighbors >= 2 && sumOfNeighbors <= 3;
@@ -44,7 +41,7 @@
             return sumOfNeighbors == 3;
     }
 
-    sumNeighborsOf(i: number, j: number): number {
+    private sumNeighborsOf(i: number, j: number): number {
         var sum: number = 0;
         for (var y = i - 1; y <= i + 1; y++) {
             for (var x = j - 1; x <= j + 1; x++) {
@@ -55,7 +52,7 @@
         return sum;
     }
 
-    getValueForNeighborAt(i: number, j: number): number {
+    private getValueForNeighborAt(i: number, j: number): number {
         if (i < 0 || i >= this.height)
             return 0;
 
@@ -75,12 +72,14 @@
 
 class LifeStateUI {
     model: LifeStateModel;
+    intervalID: number = -1;
 
     constructor(width: number, height: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement, public cellSizePX: number) {
         this.model = new LifeStateModel(width, height);
     }
 
     draw() {
+        this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
         var boolGrid: boolean[][];
         if (this.model.currGridOne)
             boolGrid = this.model.gridOne;
@@ -97,8 +96,7 @@ class LifeStateUI {
     }
 
     run() {
-        this.model.advance();
-        this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
+        this.model.update();
         this.draw();
     }
 }
@@ -107,9 +105,10 @@ window.onload = () => {
 
     var canv: any;
     canv = document.getElementById('gameCanvas');
-    canv.width = window.innerWidth;
-    canv.height = window.innerHeight;
     canv.style.border = "1px solid gray";
+
+    //canv.width = window.innerWidth;
+    //canv.height = window.innerHeight;
 
     var ctx: any;
     ctx = canv.getContext("2d");
@@ -119,7 +118,36 @@ window.onload = () => {
     var horizontalCells = canv.width / cellPx;
     var verticalCells = canv.height / cellPx;
 
-    var lifeUI: LifeStateUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, 5);
+    var lifeUI: LifeStateUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+    lifeUI.draw();
 
-    setInterval(function () { lifeUI.run(); }, 200);
+    var btnStartStop: HTMLButtonElement = <HTMLButtonElement>document.getElementById('btnStartStop');
+    btnStartStop.onclick = function () {
+        if (lifeUI.intervalID == -1) {
+            btnStartStop.innerHTML = "Stop";
+            lifeUI.intervalID = setInterval(function () { lifeUI.run(); }, (<HTMLInputElement>document.getElementById('txtSpeed')).value);
+        }
+        else
+        {
+            btnStartStop.innerHTML = "Start";
+            clearInterval(lifeUI.intervalID);
+            lifeUI.intervalID = -1;
+        }
+    };
+
+    var btnStep: HTMLButtonElement = <HTMLButtonElement>document.getElementById('btnStep');
+    btnStep.onclick = function () {
+        lifeUI.run();
+    };
+
+    var btnReset: HTMLButtonElement = <HTMLButtonElement>document.getElementById('btnReset');
+    btnReset.onclick = function () {
+        if (lifeUI.intervalID != -1)
+            clearInterval(lifeUI.intervalID);
+        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+        lifeUI.draw();
+        btnStartStop.innerHTML = "Start";
+    };
+
+    //setInterval(function () { lifeUI.run(); }, 10);
 };

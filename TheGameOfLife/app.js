@@ -14,7 +14,7 @@
             }
         }
     }
-    LifeStateModel.prototype.advance = function () {
+    LifeStateModel.prototype.update = function () {
         for (var i = 0; i < this.height; i++) {
             for (var j = 0; j < this.width; j++) {
                 this.processIndex(i, j);
@@ -24,12 +24,9 @@
     };
 
     LifeStateModel.prototype.processIndex = function (i, j) {
-        //These are a test
         if (this.currGridOne) {
-            //this.gridTwo[i][j] = !this.gridOne[i][j];
             this.gridTwo[i][j] = this.getNewCellState(i, j);
         } else {
-            //this.gridOne[i][j] = !this.gridTwo[i][j];
             this.gridOne[i][j] = this.getNewCellState(i, j);
         }
     };
@@ -77,9 +74,11 @@ var LifeStateUI = (function () {
         this.ctx = ctx;
         this.canv = canv;
         this.cellSizePX = cellSizePX;
+        this.intervalID = -1;
         this.model = new LifeStateModel(width, height);
     }
     LifeStateUI.prototype.draw = function () {
+        this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
         var boolGrid;
         if (this.model.currGridOne)
             boolGrid = this.model.gridOne;
@@ -96,8 +95,7 @@ var LifeStateUI = (function () {
     };
 
     LifeStateUI.prototype.run = function () {
-        this.model.advance();
-        this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
+        this.model.update();
         this.draw();
     };
     return LifeStateUI;
@@ -106,10 +104,10 @@ var LifeStateUI = (function () {
 window.onload = function () {
     var canv;
     canv = document.getElementById('gameCanvas');
-    canv.width = window.innerWidth;
-    canv.height = window.innerHeight;
     canv.style.border = "1px solid gray";
 
+    //canv.width = window.innerWidth;
+    //canv.height = window.innerHeight;
     var ctx;
     ctx = canv.getContext("2d");
     ctx.fillStyle = "rgb(200,0,0)";
@@ -118,10 +116,36 @@ window.onload = function () {
     var horizontalCells = canv.width / cellPx;
     var verticalCells = canv.height / cellPx;
 
-    var lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, 5);
+    var lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+    lifeUI.draw();
 
-    setInterval(function () {
+    var btnStartStop = document.getElementById('btnStartStop');
+    btnStartStop.onclick = function () {
+        if (lifeUI.intervalID == -1) {
+            btnStartStop.innerHTML = "Stop";
+            lifeUI.intervalID = setInterval(function () {
+                lifeUI.run();
+            }, document.getElementById('txtSpeed').value);
+        } else {
+            btnStartStop.innerHTML = "Start";
+            clearInterval(lifeUI.intervalID);
+            lifeUI.intervalID = -1;
+        }
+    };
+
+    var btnStep = document.getElementById('btnStep');
+    btnStep.onclick = function () {
         lifeUI.run();
-    }, 200);
+    };
+
+    var btnReset = document.getElementById('btnReset');
+    btnReset.onclick = function () {
+        if (lifeUI.intervalID != -1)
+            clearInterval(lifeUI.intervalID);
+        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+        lifeUI.draw();
+        btnStartStop.innerHTML = "Start";
+    };
+    //setInterval(function () { lifeUI.run(); }, 10);
 };
 //# sourceMappingURL=app.js.map
