@@ -3,7 +3,10 @@
     gridTwo: boolean[][];
     currGridOne: boolean = true;
 
-    constructor(public width: number, public height: number) {
+    survivalStates: number[];
+    birthStates: number[];
+
+    constructor(public width: number, public height: number, survivalBirth: string) {
         this.gridOne = [];
         this.gridTwo = [];
         for (var i = 0; i < height; i++) {
@@ -14,6 +17,23 @@
                 this.gridTwo[i][j] = false;
             }
         }
+
+        var survivalBirthArray = survivalBirth.split('/');
+        var survivalChars: string[] = survivalBirthArray[0].split('');
+        var birthChars: string[] = survivalBirthArray[1].split('');
+
+        this.survivalStates = [];
+        for (var i = 0; i < survivalChars.length; i++) {
+            this.survivalStates[i] = Number(survivalChars[i]);
+        }
+
+        this.birthStates = [];
+        for (var i = 0; i < birthChars.length; i++) {
+            this.birthStates[i] = Number(birthChars[i]);
+        }
+
+        //this.survivalStates = [2, 3];
+        //this.birthStates = [3];
     }
 
     update() {
@@ -36,9 +56,11 @@
     private getNewCellState(i: number, j: number): boolean{
         var sumOfNeighbors: number = this.sumNeighborsOf(i, j);
         if ((this.currGridOne && this.gridOne[i][j]) || (!this.currGridOne && this.gridTwo[i][j])) //current cell is alive
-            return sumOfNeighbors >= 2 && sumOfNeighbors <= 3;
+            //return sumOfNeighbors >= 2 && sumOfNeighbors <= 3;
+            return this.survivalStates.indexOf(sumOfNeighbors) != -1;
         else //current cell is dead
-            return sumOfNeighbors == 3;
+            //return sumOfNeighbors == 3;
+            return this.birthStates.indexOf(sumOfNeighbors) != -1;
     }
 
     private sumNeighborsOf(i: number, j: number): number {
@@ -74,8 +96,8 @@ class LifeStateUI {
     model: LifeStateModel;
     intervalID: number = -1;
 
-    constructor(width: number, height: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement, public cellSizePX: number) {
-        this.model = new LifeStateModel(width, height);
+    constructor(width: number, height: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement, public cellSizePX: number, survivalBirth: string) {
+        this.model = new LifeStateModel(width, height, survivalBirth);
     }
 
     draw() {
@@ -118,14 +140,14 @@ window.onload = () => {
     var horizontalCells = canv.width / cellPx;
     var verticalCells = canv.height / cellPx;
 
-    var lifeUI: LifeStateUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+    var lifeUI: LifeStateUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, (<HTMLInputElement>document.getElementById('txtSurvivalBirth')).value);
     lifeUI.draw();
 
     var btnStartStop: HTMLButtonElement = <HTMLButtonElement>document.getElementById('btnStartStop');
     btnStartStop.onclick = function () {
         if (lifeUI.intervalID == -1) {
             btnStartStop.innerHTML = "Stop";
-            lifeUI.intervalID = setInterval(function () { lifeUI.run(); }, (<HTMLInputElement>document.getElementById('txtSpeed')).value);
+            lifeUI.intervalID = setInterval(function () { lifeUI.run(); }, 1000 / Number((<HTMLInputElement>document.getElementById('txtSpeed')).value));
         }
         else
         {
@@ -144,7 +166,7 @@ window.onload = () => {
     btnReset.onclick = function () {
         if (lifeUI.intervalID != -1)
             clearInterval(lifeUI.intervalID);
-        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, (<HTMLInputElement>document.getElementById('txtSurvivalBirth')).value);
         lifeUI.draw();
         btnStartStop.innerHTML = "Start";
     };

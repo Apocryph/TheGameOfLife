@@ -1,5 +1,5 @@
 ﻿var LifeStateModel = (function () {
-    function LifeStateModel(width, height) {
+    function LifeStateModel(width, height, survivalBirth) {
         this.width = width;
         this.height = height;
         this.currGridOne = true;
@@ -13,6 +13,22 @@
                 this.gridTwo[i][j] = false;
             }
         }
+
+        var survivalBirthArray = survivalBirth.split('/');
+        var survivalChars = survivalBirthArray[0].split('');
+        var birthChars = survivalBirthArray[1].split('');
+
+        this.survivalStates = [];
+        for (var i = 0; i < survivalChars.length; i++) {
+            this.survivalStates[i] = Number(survivalChars[i]);
+        }
+
+        this.birthStates = [];
+        for (var i = 0; i < birthChars.length; i++) {
+            this.birthStates[i] = Number(birthChars[i]);
+        }
+        //this.survivalStates = [2, 3];
+        //this.birthStates = [3];
     }
     LifeStateModel.prototype.update = function () {
         for (var i = 0; i < this.height; i++) {
@@ -34,9 +50,11 @@
     LifeStateModel.prototype.getNewCellState = function (i, j) {
         var sumOfNeighbors = this.sumNeighborsOf(i, j);
         if ((this.currGridOne && this.gridOne[i][j]) || (!this.currGridOne && this.gridTwo[i][j]))
-            return sumOfNeighbors >= 2 && sumOfNeighbors <= 3;
+            //return sumOfNeighbors >= 2 && sumOfNeighbors <= 3;
+            return this.survivalStates.indexOf(sumOfNeighbors) != -1;
         else
-            return sumOfNeighbors == 3;
+            //return sumOfNeighbors == 3;
+            return this.birthStates.indexOf(sumOfNeighbors) != -1;
     };
 
     LifeStateModel.prototype.sumNeighborsOf = function (i, j) {
@@ -70,12 +88,12 @@
 })();
 
 var LifeStateUI = (function () {
-    function LifeStateUI(width, height, ctx, canv, cellSizePX) {
+    function LifeStateUI(width, height, ctx, canv, cellSizePX, survivalBirth) {
         this.ctx = ctx;
         this.canv = canv;
         this.cellSizePX = cellSizePX;
         this.intervalID = -1;
-        this.model = new LifeStateModel(width, height);
+        this.model = new LifeStateModel(width, height, survivalBirth);
     }
     LifeStateUI.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
@@ -116,7 +134,7 @@ window.onload = function () {
     var horizontalCells = canv.width / cellPx;
     var verticalCells = canv.height / cellPx;
 
-    var lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+    var lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, document.getElementById('txtSurvivalBirth').value);
     lifeUI.draw();
 
     var btnStartStop = document.getElementById('btnStartStop');
@@ -125,7 +143,7 @@ window.onload = function () {
             btnStartStop.innerHTML = "Stop";
             lifeUI.intervalID = setInterval(function () {
                 lifeUI.run();
-            }, document.getElementById('txtSpeed').value);
+            }, 1000 / Number(document.getElementById('txtSpeed').value));
         } else {
             btnStartStop.innerHTML = "Start";
             clearInterval(lifeUI.intervalID);
@@ -142,7 +160,7 @@ window.onload = function () {
     btnReset.onclick = function () {
         if (lifeUI.intervalID != -1)
             clearInterval(lifeUI.intervalID);
-        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, document.getElementById('txtSurvivalBirth').value);
         lifeUI.draw();
         btnStartStop.innerHTML = "Start";
     };
