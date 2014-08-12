@@ -7,7 +7,7 @@
     survivalStates: number[];
     birthStates: number[];
 
-    constructor(public width: number, public height: number, survivalBirth: string) {
+    constructor(public width: number, public height: number, survivalBirth: string, public numAges: number) {
         this.gridOne = [];
         this.gridTwo = [];
         this.ageGrid = [];
@@ -64,7 +64,7 @@
         var oldState: boolean = this.getCurrState(i,j);
         var age: number = this.ageGrid[i][j];
 
-        if (newState && age < 3)
+        if (newState && age < this.numAges)
             this.ageGrid[i][j]++;// = this.ageGrid[i][j] + 1;
         else if (!newState && oldState)
             this.ageGrid[i][j] = 0;
@@ -108,8 +108,10 @@ class LifeStateUI {
     model: LifeStateModel;
     intervalID: number = -1;
 
+    defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, 10);
+
     constructor(width: number, height: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement, public cellSizePX: number, survivalBirth: string) {
-        this.model = new LifeStateModel(width, height, survivalBirth);
+        this.model = new LifeStateModel(width, height, survivalBirth, 10);
     }
 
     draw() {
@@ -132,22 +134,36 @@ class LifeStateUI {
 
     private setColorForAge(i: number, j: number){
         var age: number = this.model.ageGrid[i][j];
-        var colorString: string;
-        if (age == 3)
-            colorString = "rgb(128,0,0)";
-        else if (age == 2)
-            colorString = "rgb(178,42,42)";
-        else if (age == 1)
-            colorString = "rgb(255,0,0)";
-        else
-            colorString = "rgb(0,255,0)"
-
-        this.ctx.fillStyle = colorString;
+        this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
     }
 
     run() {
         this.model.update();
         this.draw();
+    }
+}
+
+class LifeColorWrapper {
+    lerpColors: string[] = [];
+
+    constructor(oldR: number, oldG: number, oldB: number, youngR: number, youngG: number, youngB: number, public steps: number) {
+        for (var i = 0; i < steps; i++) {
+            this.lerpColors[i] = this.lerpColor(oldR, oldG, oldB, youngR, youngG, youngB, i);
+        }
+    }
+
+    private lerpColor(oldR: number, oldG: number, oldB: number, youngR: number, youngG: number, youngB: number, currStep: number) : string {
+        var t: number = currStep / this.steps;
+
+        var red: number = Math.round(this.lerp(youngR, oldR, t));
+        var green: number = Math.round(this.lerp(youngG, oldG, t));
+        var blue: number = Math.round(this.lerp(youngB, oldB, t));
+
+        return "rgb(" + red + ", " + green + ", " + blue + ")";
+    }
+
+    private lerp(v0: number, v1: number, t: number) : number {
+        return (1 - t) * v0 + t * v1;
     }
 }
 
@@ -160,6 +176,9 @@ window.onload = () => {
     var ctx: any;
     ctx = canv.getContext("2d");
     ctx.fillStyle = "rgb(200,0,0)";
+
+    canv.width = window.innerWidth - 20;
+    canv.height = window.innerHeight - 100;
 
     var cellPx: number = 5;
     var horizontalCells = canv.width / cellPx;

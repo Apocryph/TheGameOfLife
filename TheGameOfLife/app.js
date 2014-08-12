@@ -1,7 +1,8 @@
 ﻿var LifeStateModel = (function () {
-    function LifeStateModel(width, height, survivalBirth) {
+    function LifeStateModel(width, height, survivalBirth, numAges) {
         this.width = width;
         this.height = height;
+        this.numAges = numAges;
         this.currGridOne = true;
         this.gridOne = [];
         this.gridTwo = [];
@@ -58,7 +59,7 @@
         var oldState = this.getCurrState(i, j);
         var age = this.ageGrid[i][j];
 
-        if (newState && age < 3)
+        if (newState && age < this.numAges)
             this.ageGrid[i][j]++; // = this.ageGrid[i][j] + 1;
         else if (!newState && oldState)
             this.ageGrid[i][j] = 0;
@@ -105,7 +106,8 @@ var LifeStateUI = (function () {
         this.canv = canv;
         this.cellSizePX = cellSizePX;
         this.intervalID = -1;
-        this.model = new LifeStateModel(width, height, survivalBirth);
+        this.defaultColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, 10);
+        this.model = new LifeStateModel(width, height, survivalBirth, 10);
     }
     LifeStateUI.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
@@ -127,17 +129,7 @@ var LifeStateUI = (function () {
 
     LifeStateUI.prototype.setColorForAge = function (i, j) {
         var age = this.model.ageGrid[i][j];
-        var colorString;
-        if (age == 3)
-            colorString = "rgb(128,0,0)";
-        else if (age == 2)
-            colorString = "rgb(178,42,42)";
-        else if (age == 1)
-            colorString = "rgb(255,0,0)";
-        else
-            colorString = "rgb(0,255,0)";
-
-        this.ctx.fillStyle = colorString;
+        this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
     };
 
     LifeStateUI.prototype.run = function () {
@@ -145,6 +137,30 @@ var LifeStateUI = (function () {
         this.draw();
     };
     return LifeStateUI;
+})();
+
+var LifeColorWrapper = (function () {
+    function LifeColorWrapper(oldR, oldG, oldB, youngR, youngG, youngB, steps) {
+        this.steps = steps;
+        this.lerpColors = [];
+        for (var i = 0; i < steps; i++) {
+            this.lerpColors[i] = this.lerpColor(oldR, oldG, oldB, youngR, youngG, youngB, i);
+        }
+    }
+    LifeColorWrapper.prototype.lerpColor = function (oldR, oldG, oldB, youngR, youngG, youngB, currStep) {
+        var t = currStep / this.steps;
+
+        var red = Math.round(this.lerp(youngR, oldR, t));
+        var green = Math.round(this.lerp(youngG, oldG, t));
+        var blue = Math.round(this.lerp(youngB, oldB, t));
+
+        return "rgb(" + red + ", " + green + ", " + blue + ")";
+    };
+
+    LifeColorWrapper.prototype.lerp = function (v0, v1, t) {
+        return (1 - t) * v0 + t * v1;
+    };
+    return LifeColorWrapper;
 })();
 
 window.onload = function () {
@@ -155,6 +171,9 @@ window.onload = function () {
     var ctx;
     ctx = canv.getContext("2d");
     ctx.fillStyle = "rgb(200,0,0)";
+
+    canv.width = window.innerWidth - 20;
+    canv.height = window.innerHeight - 100;
 
     var cellPx = 5;
     var horizontalCells = canv.width / cellPx;
@@ -191,3 +210,4 @@ window.onload = function () {
         btnStartStop.innerHTML = "Start";
     };
 };
+//# sourceMappingURL=app.js.map
