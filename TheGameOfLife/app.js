@@ -5,12 +5,15 @@
         this.currGridOne = true;
         this.gridOne = [];
         this.gridTwo = [];
+        this.ageGrid = [];
         for (var i = 0; i < height; i++) {
             this.gridOne[i] = [];
             this.gridTwo[i] = [];
+            this.ageGrid[i] = [];
             for (var j = 0; j < width; j++) {
                 this.gridOne[i][j] = Math.random() > 0.5;
                 this.gridTwo[i][j] = false;
+                this.ageGrid[i][j] = 0;
             }
         }
 
@@ -27,9 +30,20 @@
         for (var i = 0; i < birthChars.length; i++) {
             this.birthStates[i] = Number(birthChars[i]);
         }
-        //this.survivalStates = [2, 3];
-        //this.birthStates = [3];
     }
+    LifeStateModel.prototype.getCurrState = function (i, j) {
+        if (this.currGridOne)
+            return this.gridOne[i][j];
+        return this.gridTwo[i][j];
+    };
+
+    LifeStateModel.prototype.setState = function (i, j, newState, forStateOne) {
+        if (forStateOne)
+            this.gridOne[i][j] = newState;
+        else
+            this.gridTwo[i][j] = newState;
+    };
+
     LifeStateModel.prototype.update = function () {
         for (var i = 0; i < this.height; i++) {
             for (var j = 0; j < this.width; j++) {
@@ -40,20 +54,23 @@
     };
 
     LifeStateModel.prototype.processIndex = function (i, j) {
-        if (this.currGridOne) {
-            this.gridTwo[i][j] = this.getNewCellState(i, j);
-        } else {
-            this.gridOne[i][j] = this.getNewCellState(i, j);
-        }
+        var newState = this.getNewCellState(i, j);
+        var oldState = this.getCurrState(i, j);
+        var age = this.ageGrid[i][j];
+
+        if (newState && age < 3)
+            this.ageGrid[i][j]++; // = this.ageGrid[i][j] + 1;
+        else if (!newState && oldState)
+            this.ageGrid[i][j] = 0;
+
+        this.setState(i, j, newState, !this.currGridOne);
     };
 
     LifeStateModel.prototype.getNewCellState = function (i, j) {
         var sumOfNeighbors = this.sumNeighborsOf(i, j);
-        if ((this.currGridOne && this.gridOne[i][j]) || (!this.currGridOne && this.gridTwo[i][j]))
-            //return sumOfNeighbors >= 2 && sumOfNeighbors <= 3;
+        if (this.getCurrState(i, j))
             return this.survivalStates.indexOf(sumOfNeighbors) != -1;
         else
-            //return sumOfNeighbors == 3;
             return this.birthStates.indexOf(sumOfNeighbors) != -1;
     };
 
@@ -75,12 +92,7 @@
         if (j < 0 || j >= this.width)
             return 0;
 
-        if (this.currGridOne) {
-            if (this.gridOne[i][j])
-                return 1;
-            return 0;
-        }
-        if (this.gridTwo[i][j])
+        if (this.getCurrState(i, j))
             return 1;
         return 0;
     };
@@ -106,10 +118,26 @@ var LifeStateUI = (function () {
         for (var i = 0; i < this.model.height; i++) {
             for (var j = 0; j < this.model.width; j++) {
                 if (boolGrid[i][j]) {
+                    this.setColorForAge(i, j);
                     this.ctx.fillRect(i * this.cellSizePX, j * this.cellSizePX, this.cellSizePX, this.cellSizePX);
                 }
             }
         }
+    };
+
+    LifeStateUI.prototype.setColorForAge = function (i, j) {
+        var age = this.model.ageGrid[i][j];
+        var colorString;
+        if (age == 3)
+            colorString = "rgb(128,0,0)";
+        else if (age == 2)
+            colorString = "rgb(178,42,42)";
+        else if (age == 1)
+            colorString = "rgb(255,0,0)";
+        else
+            colorString = "rgb(0,255,0)";
+
+        this.ctx.fillStyle = colorString;
     };
 
     LifeStateUI.prototype.run = function () {
@@ -124,8 +152,6 @@ window.onload = function () {
     canv = document.getElementById('gameCanvas');
     canv.style.border = "1px solid gray";
 
-    //canv.width = window.innerWidth;
-    //canv.height = window.innerHeight;
     var ctx;
     ctx = canv.getContext("2d");
     ctx.fillStyle = "rgb(200,0,0)";
@@ -164,6 +190,4 @@ window.onload = function () {
         lifeUI.draw();
         btnStartStop.innerHTML = "Start";
     };
-    //setInterval(function () { lifeUI.run(); }, 10);
 };
-//# sourceMappingURL=app.js.map
