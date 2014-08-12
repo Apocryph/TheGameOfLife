@@ -1,24 +1,8 @@
-﻿var LifeStateModel = (function () {
-    function LifeStateModel(width, height, survivalBirth, numAges) {
-        this.width = width;
-        this.height = height;
-        this.numAges = numAges;
-        this.currGridOne = true;
-        this.gridOne = [];
-        this.gridTwo = [];
-        this.ageGrid = [];
-        for (var i = 0; i < height; i++) {
-            this.gridOne[i] = [];
-            this.gridTwo[i] = [];
-            this.ageGrid[i] = [];
-            for (var j = 0; j < width; j++) {
-                this.gridOne[i][j] = Math.random() > 0.5;
-                this.gridTwo[i][j] = false;
-                this.ageGrid[i][j] = 0;
-            }
-        }
-
-        var survivalBirthArray = survivalBirth.split('/');
+﻿var LifeRules = (function () {
+    function LifeRules() {
+    }
+    LifeRules.setSurvivalBirthStates = function (inputString) {
+        var survivalBirthArray = inputString.split('/');
         var survivalChars = survivalBirthArray[0].split('');
         var birthChars = survivalBirthArray[1].split('');
 
@@ -30,6 +14,52 @@
         this.birthStates = [];
         for (var i = 0; i < birthChars.length; i++) {
             this.birthStates[i] = Number(birthChars[i]);
+        }
+    };
+
+    LifeRules.getSurvivalStates = function () {
+        return this.survivalStates;
+    };
+
+    LifeRules.getBirthStates = function () {
+        return this.birthStates;
+    };
+
+    LifeRules.setMaxAge = function (newMax) {
+        this.maxAge = newMax;
+    };
+
+    LifeRules.getMaxAge = function () {
+        return this.maxAge;
+    };
+
+    LifeRules.setLivingStartOdds = function (newOdds) {
+        this.livingStartOdds = newOdds;
+    };
+
+    LifeRules.getLivingStartOdds = function () {
+        return this.livingStartOdds;
+    };
+    return LifeRules;
+})();
+
+var LifeStateModel = (function () {
+    function LifeStateModel(width, height) {
+        this.width = width;
+        this.height = height;
+        this.currGridOne = true;
+        this.gridOne = [];
+        this.gridTwo = [];
+        this.ageGrid = [];
+        for (var i = 0; i < height; i++) {
+            this.gridOne[i] = [];
+            this.gridTwo[i] = [];
+            this.ageGrid[i] = [];
+            for (var j = 0; j < width; j++) {
+                this.gridOne[i][j] = Math.random() < LifeRules.getLivingStartOdds();
+                this.gridTwo[i][j] = false;
+                this.ageGrid[i][j] = 0;
+            }
         }
     }
     LifeStateModel.prototype.getCurrState = function (i, j) {
@@ -59,7 +89,7 @@
         var oldState = this.getCurrState(i, j);
         var age = this.ageGrid[i][j];
 
-        if (newState && age < this.numAges)
+        if (newState && age < LifeRules.getMaxAge())
             this.ageGrid[i][j]++; // = this.ageGrid[i][j] + 1;
         else if (!newState && oldState)
             this.ageGrid[i][j] = 0;
@@ -70,9 +100,9 @@
     LifeStateModel.prototype.getNewCellState = function (i, j) {
         var sumOfNeighbors = this.sumNeighborsOf(i, j);
         if (this.getCurrState(i, j))
-            return this.survivalStates.indexOf(sumOfNeighbors) != -1;
+            return LifeRules.getSurvivalStates().indexOf(sumOfNeighbors) != -1;
         else
-            return this.birthStates.indexOf(sumOfNeighbors) != -1;
+            return LifeRules.getBirthStates().indexOf(sumOfNeighbors) != -1;
     };
 
     LifeStateModel.prototype.sumNeighborsOf = function (i, j) {
@@ -101,13 +131,13 @@
 })();
 
 var LifeStateUI = (function () {
-    function LifeStateUI(width, height, ctx, canv, cellSizePX, survivalBirth) {
+    function LifeStateUI(width, height, ctx, canv, cellSizePX) {
         this.ctx = ctx;
         this.canv = canv;
         this.cellSizePX = cellSizePX;
         this.intervalID = -1;
-        this.defaultColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, 10);
-        this.model = new LifeStateModel(width, height, survivalBirth, 10);
+        this.defaultColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, LifeRules.getMaxAge());
+        this.model = new LifeStateModel(width, height);
     }
     LifeStateUI.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
@@ -179,16 +209,24 @@ window.onload = function () {
     var horizontalCells = canv.width / cellPx;
     var verticalCells = canv.height / cellPx;
 
-    var lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, document.getElementById('txtSurvivalBirth').value);
+    LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+    LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+    LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+
+    var lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
     lifeUI.draw();
 
     var btnStartStop = document.getElementById('btnStartStop');
     btnStartStop.onclick = function () {
         if (lifeUI.intervalID == -1) {
+            LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+            LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+            LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+
             btnStartStop.innerHTML = "Stop";
             lifeUI.intervalID = setInterval(function () {
                 lifeUI.run();
-            }, 1000 / Number(document.getElementById('txtSpeed').value));
+            }, 1000 / Number(getValue('txtSpeed')));
         } else {
             btnStartStop.innerHTML = "Start";
             clearInterval(lifeUI.intervalID);
@@ -205,9 +243,16 @@ window.onload = function () {
     btnReset.onclick = function () {
         if (lifeUI.intervalID != -1)
             clearInterval(lifeUI.intervalID);
-        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, document.getElementById('txtSurvivalBirth').value);
+        LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+        LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+        LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
         lifeUI.draw();
         btnStartStop.innerHTML = "Start";
     };
 };
+
+function getValue(inputName) {
+    return document.getElementById(inputName).value;
+}
 //# sourceMappingURL=app.js.map

@@ -1,28 +1,12 @@
-﻿class LifeStateModel {
-    gridOne: boolean[][];
-    gridTwo: boolean[][];
-    ageGrid: number[][];
-    currGridOne: boolean = true;
+﻿class LifeRules {
+    private static survivalStates: number[];
+    private static birthStates: number[];
+    private static maxAge: number;
+    private static livingStartOdds: number;
 
-    survivalStates: number[];
-    birthStates: number[];
-
-    constructor(public width: number, public height: number, survivalBirth: string, public numAges: number) {
-        this.gridOne = [];
-        this.gridTwo = [];
-        this.ageGrid = [];
-        for (var i = 0; i < height; i++) {
-            this.gridOne[i] = [];
-            this.gridTwo[i] = [];
-            this.ageGrid[i] = [];
-            for (var j = 0; j < width; j++) {
-                this.gridOne[i][j] = Math.random() > 0.5;
-                this.gridTwo[i][j] = false;
-                this.ageGrid[i][j] = 0;
-            }
-        }
-
-        var survivalBirthArray = survivalBirth.split('/');
+    static setSurvivalBirthStates(inputString: string) : void {
+         
+        var survivalBirthArray = inputString.split('/');
         var survivalChars: string[] = survivalBirthArray[0].split('');
         var birthChars: string[] = survivalBirthArray[1].split('');
 
@@ -34,6 +18,53 @@
         this.birthStates = [];
         for (var i = 0; i < birthChars.length; i++) {
             this.birthStates[i] = Number(birthChars[i]);
+        }
+    }
+
+    static getSurvivalStates(): number[] {
+        return this.survivalStates;
+    }
+
+    static getBirthStates(): number[] {
+        return this.birthStates;
+    }
+
+    static setMaxAge(newMax: number): void {
+        this.maxAge = newMax;
+    }
+
+    static getMaxAge(): number {
+        return this.maxAge;
+    }
+
+    static setLivingStartOdds(newOdds: number): void {
+        this.livingStartOdds = newOdds;
+    }
+
+    static getLivingStartOdds(): number {
+        return this.livingStartOdds;
+    }
+}
+
+class LifeStateModel {
+    gridOne: boolean[][];
+    gridTwo: boolean[][];
+    ageGrid: number[][];
+    currGridOne: boolean = true;
+
+    constructor(public width: number, public height: number) {
+        this.gridOne = [];
+        this.gridTwo = [];
+        this.ageGrid = [];
+        for (var i = 0; i < height; i++) {
+            this.gridOne[i] = [];
+            this.gridTwo[i] = [];
+            this.ageGrid[i] = [];
+            for (var j = 0; j < width; j++) {
+                this.gridOne[i][j] = Math.random() < LifeRules.getLivingStartOdds();
+                this.gridTwo[i][j] = false;
+                this.ageGrid[i][j] = 0;
+            }
         }
     }
 
@@ -64,7 +95,7 @@
         var oldState: boolean = this.getCurrState(i,j);
         var age: number = this.ageGrid[i][j];
 
-        if (newState && age < this.numAges)
+        if (newState && age < LifeRules.getMaxAge())
             this.ageGrid[i][j]++;// = this.ageGrid[i][j] + 1;
         else if (!newState && oldState)
             this.ageGrid[i][j] = 0;
@@ -75,9 +106,9 @@
     private getNewCellState(i: number, j: number): boolean{
         var sumOfNeighbors: number = this.sumNeighborsOf(i, j);
         if (this.getCurrState(i,j)) //current cell is alive
-            return this.survivalStates.indexOf(sumOfNeighbors) != -1;
+            return LifeRules.getSurvivalStates().indexOf(sumOfNeighbors) != -1;
         else //current cell is dead
-            return this.birthStates.indexOf(sumOfNeighbors) != -1;
+            return LifeRules.getBirthStates().indexOf(sumOfNeighbors) != -1;
     }
 
     private sumNeighborsOf(i: number, j: number): number {
@@ -108,10 +139,10 @@ class LifeStateUI {
     model: LifeStateModel;
     intervalID: number = -1;
 
-    defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, 10);
+    defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, LifeRules.getMaxAge());
 
-    constructor(width: number, height: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement, public cellSizePX: number, survivalBirth: string) {
-        this.model = new LifeStateModel(width, height, survivalBirth, 10);
+    constructor(width: number, height: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement, public cellSizePX: number) {
+        this.model = new LifeStateModel(width, height);
     }
 
     draw() {
@@ -184,14 +215,22 @@ window.onload = () => {
     var horizontalCells = canv.width / cellPx;
     var verticalCells = canv.height / cellPx;
 
-    var lifeUI: LifeStateUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, (<HTMLInputElement>document.getElementById('txtSurvivalBirth')).value);
+    LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+    LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+    LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+
+    var lifeUI: LifeStateUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
     lifeUI.draw();
 
     var btnStartStop: HTMLButtonElement = <HTMLButtonElement>document.getElementById('btnStartStop');
     btnStartStop.onclick = function () {
         if (lifeUI.intervalID == -1) {
+            LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+            LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+            LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+
             btnStartStop.innerHTML = "Stop";
-            lifeUI.intervalID = setInterval(function () { lifeUI.run(); }, 1000 / Number((<HTMLInputElement>document.getElementById('txtSpeed')).value));
+            lifeUI.intervalID = setInterval(function () { lifeUI.run(); }, 1000 / Number(getValue('txtSpeed')));
         }
         else
         {
@@ -210,8 +249,15 @@ window.onload = () => {
     btnReset.onclick = function () {
         if (lifeUI.intervalID != -1)
             clearInterval(lifeUI.intervalID);
-        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx, (<HTMLInputElement>document.getElementById('txtSurvivalBirth')).value);
+        LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+        LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+        LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
         lifeUI.draw();
         btnStartStop.innerHTML = "Start";
     };
 };
+
+function getValue(inputName: string): string {
+    return (<HTMLInputElement>document.getElementById(inputName)).value;
+}
