@@ -211,7 +211,7 @@ window.onload = () => {
     canv.width = window.innerWidth - 20;
     canv.height = window.innerHeight - 100;
 
-    var cellPx: number = 5;
+    var cellPx: number = Number(getValue('txtCellPixels'));
     var horizontalCells = canv.width / cellPx;
     var verticalCells = canv.height / cellPx;
 
