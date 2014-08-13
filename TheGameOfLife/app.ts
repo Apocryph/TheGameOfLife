@@ -51,16 +51,28 @@ class LifeStateModel {
     gridTwo: boolean[][];
     ageGrid: number[][];
     currGridOne: boolean = true;
+    width: number;
+    height: number;
 
-    constructor(public width: number, public height: number) {
+    constructor() {
+
+    }
+
+    reset(newWidth: number, newHeight: number) : void {
+        this.width = newWidth;
+        this.height = newHeight;
+        this.resetGrid();
+    }
+
+    private resetGrid() : void {
         this.gridOne = [];
         this.gridTwo = [];
         this.ageGrid = [];
-        for (var i = 0; i < height; i++) {
+        for (var i = 0; i < this.height; i++) {
             this.gridOne[i] = [];
             this.gridTwo[i] = [];
             this.ageGrid[i] = [];
-            for (var j = 0; j < width; j++) {
+            for (var j = 0; j < this.width; j++) {
                 this.gridOne[i][j] = Math.random() < LifeRules.getLivingStartOdds();
                 this.gridTwo[i][j] = false;
                 this.ageGrid[i][j] = 0;
@@ -138,11 +150,10 @@ class LifeStateModel {
 class LifeStateUI {
     model: LifeStateModel;
     intervalID: number = -1;
-
     defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, LifeRules.getMaxAge());
 
-    constructor(width: number, height: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement, public cellSizePX: number) {
-        this.model = new LifeStateModel(width, height);
+    constructor(public cellPx: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement) {
+        this.model = new LifeStateModel();
     }
 
     draw() {
@@ -157,7 +168,7 @@ class LifeStateUI {
             for (var j = 0; j < this.model.width; j++) {
                 if (boolGrid[i][j]) {
                     this.setColorForAge(i,j);
-                    this.ctx.fillRect(i * this.cellSizePX, j * this.cellSizePX, this.cellSizePX, this.cellSizePX);
+                    this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
                 }
             }
         }
@@ -168,6 +179,15 @@ class LifeStateUI {
         this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
     }
 
+    reset()
+    {
+        this.intervalID = -1;
+        this.defaultColorWrapper.resetColors();
+        var horizontalCells = this.canv.width / this.cellPx;
+        var verticalCells = this.canv.height / this.cellPx; 
+        this.model.reset(verticalCells, horizontalCells) 
+    }
+
     run() {
         this.model.update();
         this.draw();
@@ -175,20 +195,26 @@ class LifeStateUI {
 }
 
 class LifeColorWrapper {
-    lerpColors: string[] = [];
+    lerpColors: string[];
 
-    constructor(oldR: number, oldG: number, oldB: number, youngR: number, youngG: number, youngB: number, public steps: number) {
-        for (var i = 0; i < steps; i++) {
-            this.lerpColors[i] = this.lerpColor(oldR, oldG, oldB, youngR, youngG, youngB, i);
+    constructor(public oldR: number, public oldG: number, public oldB: number,
+                public youngR: number, public youngG: number, public youngB: number, public steps: number) {
+        this.resetColors();
+    }
+
+    public resetColors() : void {
+        this.lerpColors = [];
+        for (var i: number = 0; i < this.steps; i++){
+            this.lerpColors[i] = this.lerpColor(i);
         }
     }
 
-    private lerpColor(oldR: number, oldG: number, oldB: number, youngR: number, youngG: number, youngB: number, currStep: number) : string {
+    private lerpColor(currStep: number) : string {
         var t: number = currStep / this.steps;
 
-        var red: number = Math.round(this.lerp(youngR, oldR, t));
-        var green: number = Math.round(this.lerp(youngG, oldG, t));
-        var blue: number = Math.round(this.lerp(youngB, oldB, t));
+        var red: number = Math.round(this.lerp(this.youngR, this.oldR, t));
+        var green: number = Math.round(this.lerp(this.youngG, this.oldG, t));
+        var blue: number = Math.round(this.lerp(this.youngB, this.oldB, t));
 
         return "rgb(" + red + ", " + green + ", " + blue + ")";
     }
@@ -211,23 +237,17 @@ window.onload = () => {
     canv.width = window.innerWidth - 20;
     canv.height = window.innerHeight - 100;
 
+    refreshRules();
+
     var cellPx: number = Number(getValue('txtCellPixels'));
-    var horizontalCells = canv.width / cellPx;
-    var verticalCells = canv.height / cellPx;
-
-    LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
-    LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
-    LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
-
-    var lifeUI: LifeStateUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+    var lifeUI: LifeStateUI = new LifeStateUI(cellPx, ctx, canv);
+    lifeUI.reset();
     lifeUI.draw();
 
     var btnStartStop: HTMLButtonElement = <HTMLButtonElement>document.getElementById('btnStartStop');
     btnStartStop.onclick = function () {
         if (lifeUI.intervalID == -1) {
-            LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
-            LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
-            LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+            refreshRules();
 
             btnStartStop.innerHTML = "Stop";
             lifeUI.intervalID = setInterval(function () { lifeUI.run(); }, 1000 / Number(getValue('txtSpeed')));
@@ -249,10 +269,9 @@ window.onload = () => {
     btnReset.onclick = function () {
         if (lifeUI.intervalID != -1)
             clearInterval(lifeUI.intervalID);
-        LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
-        LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
-        LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
-        lifeUI = new LifeStateUI(verticalCells, horizontalCells, ctx, canv, cellPx);
+        refreshRules();
+        lifeUI.cellPx = Number(getValue('txtCellPixels'));
+        lifeUI.reset();
         lifeUI.draw();
         btnStartStop.innerHTML = "Start";
     };
@@ -260,4 +279,10 @@ window.onload = () => {
 
 function getValue(inputName: string): string {
     return (<HTMLInputElement>document.getElementById(inputName)).value;
+}
+
+function refreshRules(): void {
+        LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+        LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+        LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
 }
