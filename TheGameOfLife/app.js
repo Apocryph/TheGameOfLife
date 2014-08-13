@@ -54,6 +54,7 @@ var LifeStateModel = (function () {
     };
 
     LifeStateModel.prototype.resetGrid = function () {
+        this.currGridOne = true;
         this.gridOne = [];
         this.gridTwo = [];
         this.ageGrid = [];
@@ -143,7 +144,7 @@ var LifeStateUI = (function () {
         this.ctx = ctx;
         this.canv = canv;
         this.intervalID = -1;
-        this.defaultColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, LifeRules.getMaxAge());
+        this.defaultColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63);
         this.model = new LifeStateModel();
     }
     LifeStateUI.prototype.draw = function () {
@@ -185,25 +186,24 @@ var LifeStateUI = (function () {
 })();
 
 var LifeColorWrapper = (function () {
-    function LifeColorWrapper(oldR, oldG, oldB, youngR, youngG, youngB, steps) {
+    function LifeColorWrapper(oldR, oldG, oldB, youngR, youngG, youngB) {
         this.oldR = oldR;
         this.oldG = oldG;
         this.oldB = oldB;
         this.youngR = youngR;
         this.youngG = youngG;
         this.youngB = youngB;
-        this.steps = steps;
         this.resetColors();
     }
     LifeColorWrapper.prototype.resetColors = function () {
         this.lerpColors = [];
-        for (var i = 0; i < this.steps; i++) {
+        for (var i = 0; i < LifeRules.getMaxAge(); i++) {
             this.lerpColors[i] = this.lerpColor(i);
         }
     };
 
     LifeColorWrapper.prototype.lerpColor = function (currStep) {
-        var t = currStep / this.steps;
+        var t = currStep / LifeRules.getMaxAge();
 
         var red = Math.round(this.lerp(this.youngR, this.oldR, t));
         var green = Math.round(this.lerp(this.youngG, this.oldG, t));
@@ -241,7 +241,6 @@ window.onload = function () {
     btnStartStop.onclick = function () {
         if (lifeUI.intervalID == -1) {
             refreshRules();
-
             btnStartStop.innerHTML = "Stop";
             lifeUI.intervalID = setInterval(function () {
                 lifeUI.run();
@@ -279,3 +278,4 @@ function refreshRules() {
     LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
     LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
 }
+//# sourceMappingURL=app.js.map

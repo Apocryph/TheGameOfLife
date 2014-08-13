@@ -64,7 +64,8 @@ class LifeStateModel {
         this.resetGrid();
     }
 
-    private resetGrid() : void {
+    private resetGrid(): void {
+        this.currGridOne = true;
         this.gridOne = [];
         this.gridTwo = [];
         this.ageGrid = [];
@@ -150,7 +151,7 @@ class LifeStateModel {
 class LifeStateUI {
     model: LifeStateModel;
     intervalID: number = -1;
-    defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63, LifeRules.getMaxAge());
+    defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63);
 
     constructor(public cellPx: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement) {
         this.model = new LifeStateModel();
@@ -198,19 +199,19 @@ class LifeColorWrapper {
     lerpColors: string[];
 
     constructor(public oldR: number, public oldG: number, public oldB: number,
-                public youngR: number, public youngG: number, public youngB: number, public steps: number) {
+                public youngR: number, public youngG: number, public youngB: number) {
         this.resetColors();
     }
 
     public resetColors() : void {
         this.lerpColors = [];
-        for (var i: number = 0; i < this.steps; i++){
+        for (var i: number = 0; i < LifeRules.getMaxAge(); i++){
             this.lerpColors[i] = this.lerpColor(i);
         }
     }
 
     private lerpColor(currStep: number) : string {
-        var t: number = currStep / this.steps;
+        var t: number = currStep / LifeRules.getMaxAge();
 
         var red: number = Math.round(this.lerp(this.youngR, this.oldR, t));
         var green: number = Math.round(this.lerp(this.youngG, this.oldG, t));
@@ -248,7 +249,6 @@ window.onload = () => {
     btnStartStop.onclick = function () {
         if (lifeUI.intervalID == -1) {
             refreshRules();
-
             btnStartStop.innerHTML = "Stop";
             lifeUI.intervalID = setInterval(function () { lifeUI.run(); }, 1000 / Number(getValue('txtSpeed')));
         }
@@ -282,7 +282,7 @@ function getValue(inputName: string): string {
 }
 
 function refreshRules(): void {
-        LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
-        LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
-        LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+    LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
+    LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+    LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
 }
