@@ -144,11 +144,13 @@ var LifeStateUI = (function () {
         this.ctx = ctx;
         this.canv = canv;
         this.intervalID = -1;
-        this.defaultColorWrapper = new LifeColorWrapper(69, 11, 187, 235, 0, 63);
+        this.defaultColorWrapper = new LifeColorWrapper();
         this.model = new LifeStateModel();
     }
     LifeStateUI.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
+        this.ctx.fillStyle = bgColor;
+        this.ctx.fillRect(0, 0, this.canv.width, this.canv.height);
         var boolGrid;
         if (this.model.currGridOne)
             boolGrid = this.model.gridOne;
@@ -186,13 +188,7 @@ var LifeStateUI = (function () {
 })();
 
 var LifeColorWrapper = (function () {
-    function LifeColorWrapper(oldR, oldG, oldB, youngR, youngG, youngB) {
-        this.oldR = oldR;
-        this.oldG = oldG;
-        this.oldB = oldB;
-        this.youngR = youngR;
-        this.youngG = youngG;
-        this.youngB = youngB;
+    function LifeColorWrapper() {
         this.resetColors();
     }
     LifeColorWrapper.prototype.resetColors = function () {
@@ -218,6 +214,10 @@ var LifeColorWrapper = (function () {
     return LifeColorWrapper;
 })();
 
+var lifeUI;
+
+var bgColor = "rgb(255,255,255)";
+
 window.onload = function () {
     var canv;
     canv = document.getElementById('gameCanvas');
@@ -233,7 +233,7 @@ window.onload = function () {
     refreshRules();
 
     var cellPx = Number(getValue('txtCellPixels'));
-    var lifeUI = new LifeStateUI(cellPx, ctx, canv);
+    lifeUI = new LifeStateUI(cellPx, ctx, canv);
     lifeUI.reset();
     lifeUI.draw();
 
@@ -241,6 +241,7 @@ window.onload = function () {
     btnStartStop.onclick = function () {
         if (lifeUI.intervalID == -1) {
             refreshRules();
+            refreshColors();
             btnStartStop.innerHTML = "Stop";
             lifeUI.intervalID = setInterval(function () {
                 lifeUI.run();
@@ -262,6 +263,7 @@ window.onload = function () {
         if (lifeUI.intervalID != -1)
             clearInterval(lifeUI.intervalID);
         refreshRules();
+        refreshColors();
         lifeUI.cellPx = Number(getValue('txtCellPixels'));
         lifeUI.reset();
         lifeUI.draw();
@@ -277,5 +279,26 @@ function refreshRules() {
     LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
     LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
     LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+}
+
+function refreshColors() {
+    var startColorString = getValue('txtYoungColor');
+    var endColorString = getValue('txtOldColor');
+
+    var startColorsSplit = startColorString.split(",");
+    var endColorsSplit = endColorString.split(",");
+
+    lifeUI.defaultColorWrapper.youngR = Number(startColorsSplit[0]);
+    lifeUI.defaultColorWrapper.youngG = Number(startColorsSplit[1]);
+    lifeUI.defaultColorWrapper.youngB = Number(startColorsSplit[2]);
+    lifeUI.defaultColorWrapper.oldR = Number(endColorsSplit[0]);
+    lifeUI.defaultColorWrapper.oldG = Number(endColorsSplit[1]);
+    lifeUI.defaultColorWrapper.oldB = Number(endColorsSplit[2]);
+
+    lifeUI.defaultColorWrapper.resetColors();
+
+    var bgColorString = getValue('txtBGColor');
+    var bgColorsSplit = bgColorString.split(",");
+    bgColor = "rgb(" + bgColorsSplit[0] + "," + bgColorsSplit[1] + "," + bgColorsSplit[2] + ")";
 }
 //# sourceMappingURL=app.js.map
