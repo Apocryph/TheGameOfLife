@@ -6,14 +6,32 @@
         <title>Conway's Game of Life</title>
         <link rel="stylesheet" href="app.css" type="text/css" />
         <script src="app.js"></script>
+        <script src="references.js"></script>
+        <script src="LifeStateModel.js"></script>
+        <script src="LifeRules.js"></script>
+        <script src="LifeColorWrapper.js"></script>
+        <script src="LifeStateUI.js"></script>
     </head>
     <body>
         <table>
             <tr>
-                <td colspan ="20">
+                <td colspan="20">
                     <canvas id="gameCanvas" width="1600" height="800">
                         Your browser is not compatible with HTML5 Canvas.
                     </canvas>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="20">
+                    <button type="button" id="btnStartStop">
+                        Start
+                    </button>
+                    <button type="button" id="btnStep">
+                        Step
+                    </button>
+                    <button type="button" id="btnReset">
+                        Reset
+                    </button>
                 </td>
             </tr>
             <tr>
@@ -37,6 +55,8 @@
                         Speed: <input type="text" name="speed" id="txtSpeed" value="10" />
                     </form>
                 </td>
+            </tr>
+            <tr>
                 <td>
                     <form>
                         Survival/Birth <input type="text" name="survivalBirth" id="txtSurvivalBirth" value="23/3"/>
@@ -56,21 +76,6 @@
                     <form>
                         Cell Pixels <input type="text" name="cellPixels" id="txtCellPixels" value="5"/>
                     </form>
-                </td>
-                <td>
-                    <button type="button" id="btnStartStop">
-                        Start
-                    </button>
-                </td>
-                <td>
-                    <button type="button" id="btnStep">
-                        Step
-                    </button>
-                </td>
-                <td>
-                    <button type="button" id="btnReset">
-                        Reset
-                    </button>
                 </td>
             </tr>
         </table>

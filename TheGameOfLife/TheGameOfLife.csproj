@@ -25,6 +25,11 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
+    <TypeScriptCompile Include="LifeColorWrapper.ts" />
+    <TypeScriptCompile Include="LifeRules.ts" />
+    <TypeScriptCompile Include="LifeStateModel.ts" />
+    <TypeScriptCompile Include="LifeStateUI.ts" />
+    <TypeScriptCompile Include="references.ts" />
   </ItemGroup>
   <ItemGroup>
     <None Include="web.Debug.config">
