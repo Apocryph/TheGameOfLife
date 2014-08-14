@@ -39,6 +39,10 @@ class LifeRules {
         return this.maxAge;
     }
 
+    static getMinAge(): number {
+        return -10;
+    }
+
     static setLivingStartOdds(newOdds: number): void {
         this.livingStartOdds = newOdds;
     }

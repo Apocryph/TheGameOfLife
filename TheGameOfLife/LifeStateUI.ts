@@ -4,10 +4,18 @@ class LifeStateUI {
     model: LifeStateModel;
     intervalID: number = -1;
     defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper();
+    deadColorWrapper: LifeColorWrapper = new LifeColorWrapper();
     bgColor: string = "rgb(255,255,255)";
 
     constructor(public cellPx: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement) {
         this.model = new LifeStateModel();
+        this.deadColorWrapper.youngR = 0;
+        this.deadColorWrapper.youngG = 0;
+        this.deadColorWrapper.youngB = 0;
+        this.deadColorWrapper.oldR = 255;
+        this.deadColorWrapper.oldG = 255;
+        this.deadColorWrapper.oldB = 255;
+        this.deadColorWrapper.resetColors();
     }
 
     draw() {
@@ -26,13 +34,20 @@ class LifeStateUI {
                     this.setColorForAge(i, j);
                     this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
                 }
+                else {
+                    this.setColorForAge(i, j);
+                    this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
+                }
             }
         }
     }
 
     private setColorForAge(i: number, j: number) {
         var age: number = this.model.ageGrid[i][j];
-        this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
+        if (age > 0)
+            this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
+        else
+            this.ctx.fillStyle = this.deadColorWrapper.lerpColors[(age * -1) - 1];
     }
 
     reset() {
@@ -40,7 +55,7 @@ class LifeStateUI {
         this.defaultColorWrapper.resetColors();
         var horizontalCells = this.canv.width / this.cellPx;
         var verticalCells = this.canv.height / this.cellPx;
-        this.model.reset(verticalCells, horizontalCells)
+        this.model.reset(verticalCells, horizontalCells);
     }
 
     run() {

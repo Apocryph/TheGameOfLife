@@ -6,8 +6,16 @@ var LifeStateUI = (function () {
         this.canv = canv;
         this.intervalID = -1;
         this.defaultColorWrapper = new LifeColorWrapper();
+        this.deadColorWrapper = new LifeColorWrapper();
         this.bgColor = "rgb(255,255,255)";
         this.model = new LifeStateModel();
+        this.deadColorWrapper.youngR = 0;
+        this.deadColorWrapper.youngG = 0;
+        this.deadColorWrapper.youngB = 0;
+        this.deadColorWrapper.oldR = 255;
+        this.deadColorWrapper.oldG = 255;
+        this.deadColorWrapper.oldB = 255;
+        this.deadColorWrapper.resetColors();
     }
     LifeStateUI.prototype.draw = function () {
         this.ctx.clearRect(0, 0, this.canv.width, this.canv.height);
@@ -24,6 +32,9 @@ var LifeStateUI = (function () {
                 if (boolGrid[i][j]) {
                     this.setColorForAge(i, j);
                     this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
+                } else {
+                    this.setColorForAge(i, j);
+                    this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
                 }
             }
         }
@@ -31,7 +42,10 @@ var LifeStateUI = (function () {
 
     LifeStateUI.prototype.setColorForAge = function (i, j) {
         var age = this.model.ageGrid[i][j];
-        this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
+        if (age > 0)
+            this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
+        else
+            this.ctx.fillStyle = this.deadColorWrapper.lerpColors[(age * -1) - 1];
     };
 
     LifeStateUI.prototype.reset = function () {
