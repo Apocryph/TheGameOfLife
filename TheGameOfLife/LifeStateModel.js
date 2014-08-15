@@ -57,10 +57,23 @@ var LifeStateModel = (function () {
         //    this.ageGrid[i][j]++;// = this.ageGrid[i][j] + 1;
         //else if (!newState && oldState)
         //    this.ageGrid[i][j] = 0;
-        if (newState && age < LifeRules.getMaxAge())
-            this.ageGrid[i][j]++;
-        else if (!newState && age > LifeRules.getMinAge())
-            this.ageGrid[i][j]--;
+        //if (newState && age < LifeRules.getMaxAge())
+        //    this.ageGrid[i][j]++;
+        //else if (!newState && age > LifeRules.getMinAge())
+        //    this.ageGrid[i][j]--;
+        //else if (!newState && oldState)
+        //    this.ageGrid[i][j] = 0;
+        if (newState) {
+            if (age <= 0)
+                this.ageGrid[i][j] = 1;
+            else if (age < LifeRules.getMaxAge())
+                this.ageGrid[i][j]++;
+        } else {
+            if (age > 0)
+                this.ageGrid[i][j] = -1;
+            else if (age > LifeRules.getMinAge())
+                this.ageGrid[i][j]--;
+        }
 
         this.setState(i, j, newState, !this.currGridOne);
     };

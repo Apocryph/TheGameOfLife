@@ -30,11 +30,16 @@ class LifeStateUI {
 
         for (var i = 0; i < this.model.height; i++) {
             for (var j = 0; j < this.model.width; j++) {
-                if (boolGrid[i][j]) {
+                var age: number = this.model.ageGrid[i][j];
+                if (age > 0) {
                     this.setColorForAge(i, j);
                     this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
                 }
-                else {
+                //else if (age == 0) {
+                //    this.ctx.fillStyle = "rgb(0,255,0)";
+                //    this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
+                //}
+                else if (age < 0){
                     this.setColorForAge(i, j);
                     this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
                 }
