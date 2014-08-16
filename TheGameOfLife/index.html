@@ -9,7 +9,8 @@
         <script src="references.js"></script>
         <script src="LifeStateModel.js"></script>
         <script src="LifeRules.js"></script>
-        <script src="LifeColorWrapper.js"></script>
+        <script src="LifeRGBColor.js"></script>
+        <script src="LifeColorStateWrapper.js"></script>
         <script src="LifeStateUI.js"></script>
     </head>
     <body>
@@ -37,12 +38,22 @@
             <tr>
                 <td>
                     <form>
-                        Young Color: <input type="text" name="youngColor" id="txtYoungColor" value="235,0,63" />
+                        Young Life Color: <input type="text" name="youngLifeColor" id="txtYoungLifeColor" value="235,0,63" />
                     </form>
                 </td>
                 <td>
                     <form>
-                        Old Color: <input type="text" name="oldColor" id="txtOldColor" value="69,11,187" />
+                        Old Life Color: <input type="text" name="oldLifeColor" id="txtOldLifeColor" value="69,11,187" />
+                    </form>
+                </td>
+                <td>
+                    <form>
+                        Young Death Color: <input type="text" name="youngDeathColor" id="txtYoungDeathColor" value="0,0,0" />
+                    </form>
+                </td>
+                <td>
+                    <form>
+                        Old Death Color: <input type="text" name="oldDeathColor" id="txtOldDeathColor" value="255,255,255" />
                     </form>
                 </td>
                 <td>
@@ -64,7 +75,12 @@
                 </td>
                 <td>
                     <form>
-                        Max Age <input type ="text" name="maxAge" id="txtMaxAge" value ="10"/>
+                        Max Age <input type ="text" name="maxAge" id="txtMaxAge" value ="1000"/>
+                    </form>
+                </td>
+                <td>
+                    <form>
+                        Min Age <input type="text" name="minAge" id="txtMinAge" value="-1000" />
                     </form>
                 </td>
                 <td>

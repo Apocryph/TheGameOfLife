@@ -34,8 +34,12 @@ var LifeRules = (function () {
         return this.maxAge;
     };
 
+    LifeRules.setMinAge = function (newMin) {
+        this.minAge = newMin;
+    };
+
     LifeRules.getMinAge = function () {
-        return -10;
+        return this.minAge;
     };
 
     LifeRules.setLivingStartOdds = function (newOdds) {

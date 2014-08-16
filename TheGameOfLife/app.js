@@ -61,24 +61,40 @@ function getValue(inputName) {
 function refreshRules() {
     LifeRules.setSurvivalBirthStates(getValue('txtSurvivalBirth'));
     LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
+    LifeRules.setMinAge(Number(getValue('txtMinAge')));
     LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
 }
 
 function refreshColors() {
-    var startColorString = getValue('txtYoungColor');
-    var endColorString = getValue('txtOldColor');
+    var youngLifeColorString = getValue('txtYoungLifeColor');
+    var oldLifeColorString = getValue('txtOldLifeColor');
 
-    var startColorsSplit = startColorString.split(",");
-    var endColorsSplit = endColorString.split(",");
+    var youngLifeColorsSplit = youngLifeColorString.split(",");
+    var oldLifeColorsSplit = oldLifeColorString.split(",");
 
-    lifeUI.defaultColorWrapper.youngR = Number(startColorsSplit[0]);
-    lifeUI.defaultColorWrapper.youngG = Number(startColorsSplit[1]);
-    lifeUI.defaultColorWrapper.youngB = Number(startColorsSplit[2]);
-    lifeUI.defaultColorWrapper.oldR = Number(endColorsSplit[0]);
-    lifeUI.defaultColorWrapper.oldG = Number(endColorsSplit[1]);
-    lifeUI.defaultColorWrapper.oldB = Number(endColorsSplit[2]);
+    lifeUI.lifeColorWrapper.youngColor.red = Number(youngLifeColorsSplit[0]);
+    lifeUI.lifeColorWrapper.youngColor.green = Number(youngLifeColorsSplit[1]);
+    lifeUI.lifeColorWrapper.youngColor.blue = Number(youngLifeColorsSplit[2]);
+    lifeUI.lifeColorWrapper.oldColor.red = Number(oldLifeColorsSplit[0]);
+    lifeUI.lifeColorWrapper.oldColor.green = Number(oldLifeColorsSplit[1]);
+    lifeUI.lifeColorWrapper.oldColor.blue = Number(oldLifeColorsSplit[2]);
+    lifeUI.lifeColorWrapper.steps = LifeRules.getMaxAge();
+    lifeUI.lifeColorWrapper.resetColors();
 
-    lifeUI.defaultColorWrapper.resetColors();
+    var youngDeathColorString = getValue('txtYoungDeathColor');
+    var oldDeathColorString = getValue('txtOldDeathColor');
+
+    var youngDeathColorsSplit = youngDeathColorString.split(",");
+    var oldDeathColorsSplit = oldDeathColorString.split(",");
+
+    lifeUI.deathColorWrapper.youngColor.red = Number(youngDeathColorsSplit[0]);
+    lifeUI.deathColorWrapper.youngColor.green = Number(youngDeathColorsSplit[1]);
+    lifeUI.deathColorWrapper.youngColor.blue = Number(youngDeathColorsSplit[2]);
+    lifeUI.deathColorWrapper.oldColor.red = Number(oldDeathColorsSplit[0]);
+    lifeUI.deathColorWrapper.oldColor.green = Number(oldDeathColorsSplit[1]);
+    lifeUI.deathColorWrapper.oldColor.blue = Number(oldDeathColorsSplit[2]);
+    lifeUI.deathColorWrapper.steps = (LifeRules.getMinAge() * -1) + 1;
+    lifeUI.deathColorWrapper.resetColors();
 
     var bgColorString = getValue('txtBGColor');
     var bgColorsSplit = bgColorString.split(",");

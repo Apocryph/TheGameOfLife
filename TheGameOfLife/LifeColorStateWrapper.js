@@ -1,21 +1,22 @@
 ﻿///<reference path="references.ts"/>
 var LifeColorStateWrapper = (function () {
     function LifeColorStateWrapper() {
-        this.resetColors();
+        this.oldColor = new LifeRGBColor();
+        this.youngColor = new LifeRGBColor();
     }
     LifeColorStateWrapper.prototype.resetColors = function () {
         this.lerpColors = [];
-        for (var i = 0; i < LifeRules.getMaxAge(); i++) {
+        for (var i = 0; i < this.steps; i++) {
             this.lerpColors[i] = this.lerpColor(i);
         }
     };
 
     LifeColorStateWrapper.prototype.lerpColor = function (currStep) {
-        var t = currStep / LifeRules.getMaxAge();
+        var t = currStep / this.steps;
 
-        var red = Math.round(this.lerp(this.youngR, this.oldR, t));
-        var green = Math.round(this.lerp(this.youngG, this.oldG, t));
-        var blue = Math.round(this.lerp(this.youngB, this.oldB, t));
+        var red = Math.round(this.lerp(this.youngColor.red, this.oldColor.red, t));
+        var green = Math.round(this.lerp(this.youngColor.green, this.oldColor.green, t));
+        var blue = Math.round(this.lerp(this.youngColor.blue, this.oldColor.blue, t));
 
         return "rgb(" + red + ", " + green + ", " + blue + ")";
     };
@@ -25,4 +26,4 @@ var LifeColorStateWrapper = (function () {
     };
     return LifeColorStateWrapper;
 })();
-//# sourceMappingURL=LifeColorWrapper.js.map
+//# sourceMappingURL=LifeColorStateWrapper.js.map

@@ -75,7 +75,7 @@ class LifeStateModel {
         //    this.ageGrid[i][j] = 0;
 
         if (newState) {
-            if (age <= 0)
+            if (age < 1)
                 this.ageGrid[i][j] = 1;
             else if (age < LifeRules.getMaxAge())
                 this.ageGrid[i][j]++;
@@ -83,7 +83,7 @@ class LifeStateModel {
         else
         {
             if (age > 0)
-                this.ageGrid[i][j] = -1;
+                this.ageGrid[i][j] = 0;
             else if (age > LifeRules.getMinAge())
                 this.ageGrid[i][j]--;
         }

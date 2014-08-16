@@ -4,6 +4,7 @@ class LifeRules {
     private static survivalStates: number[];
     private static birthStates: number[];
     private static maxAge: number;
+    private static minAge: number;
     private static livingStartOdds: number;
 
     static setSurvivalBirthStates(inputString: string): void {
@@ -39,8 +40,12 @@ class LifeRules {
         return this.maxAge;
     }
 
+    static setMinAge(newMin: number): void {
+        this.minAge = newMin;
+    }
+
     static getMinAge(): number {
-        return -10;
+        return this.minAge;
     }
 
     static setLivingStartOdds(newOdds: number): void {

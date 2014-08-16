@@ -3,19 +3,12 @@
 class LifeStateUI {
     model: LifeStateModel;
     intervalID: number = -1;
-    defaultColorWrapper: LifeColorWrapper = new LifeColorWrapper();
-    deadColorWrapper: LifeColorWrapper = new LifeColorWrapper();
+    lifeColorWrapper: LifeColorStateWrapper = new LifeColorStateWrapper();
+    deathColorWrapper: LifeColorStateWrapper = new LifeColorStateWrapper();
     bgColor: string = "rgb(255,255,255)";
 
     constructor(public cellPx: number, public ctx: CanvasRenderingContext2D, public canv: HTMLCanvasElement) {
         this.model = new LifeStateModel();
-        this.deadColorWrapper.youngR = 0;
-        this.deadColorWrapper.youngG = 0;
-        this.deadColorWrapper.youngB = 0;
-        this.deadColorWrapper.oldR = 255;
-        this.deadColorWrapper.oldG = 255;
-        this.deadColorWrapper.oldB = 255;
-        this.deadColorWrapper.resetColors();
     }
 
     draw() {
@@ -30,19 +23,8 @@ class LifeStateUI {
 
         for (var i = 0; i < this.model.height; i++) {
             for (var j = 0; j < this.model.width; j++) {
-                var age: number = this.model.ageGrid[i][j];
-                if (age > 0) {
-                    this.setColorForAge(i, j);
-                    this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
-                }
-                //else if (age == 0) {
-                //    this.ctx.fillStyle = "rgb(0,255,0)";
-                //    this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
-                //}
-                else if (age < 0){
-                    this.setColorForAge(i, j);
-                    this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
-                }
+                this.setColorForAge(i, j);
+                this.ctx.fillRect(i * this.cellPx, j * this.cellPx, this.cellPx, this.cellPx);
             }
         }
     }
@@ -50,14 +32,15 @@ class LifeStateUI {
     private setColorForAge(i: number, j: number) {
         var age: number = this.model.ageGrid[i][j];
         if (age > 0)
-            this.ctx.fillStyle = this.defaultColorWrapper.lerpColors[age - 1];
+            this.ctx.fillStyle = this.lifeColorWrapper.lerpColors[age - 1];
         else
-            this.ctx.fillStyle = this.deadColorWrapper.lerpColors[(age * -1) - 1];
+            this.ctx.fillStyle = this.deathColorWrapper.lerpColors[(age * -1)];
     }
 
     reset() {
         this.intervalID = -1;
-        this.defaultColorWrapper.resetColors();
+        this.lifeColorWrapper.resetColors();
+        this.deathColorWrapper.resetColors();
         var horizontalCells = this.canv.width / this.cellPx;
         var verticalCells = this.canv.height / this.cellPx;
         this.model.reset(verticalCells, horizontalCells);
