@@ -53,16 +53,6 @@ var LifeStateModel = (function () {
         var oldState = this.getCurrState(i, j);
         var age = this.ageGrid[i][j];
 
-        //if (newState && age < LifeRules.getMaxAge())
-        //    this.ageGrid[i][j]++;// = this.ageGrid[i][j] + 1;
-        //else if (!newState && oldState)
-        //    this.ageGrid[i][j] = 0;
-        //if (newState && age < LifeRules.getMaxAge())
-        //    this.ageGrid[i][j]++;
-        //else if (!newState && age > LifeRules.getMinAge())
-        //    this.ageGrid[i][j]--;
-        //else if (!newState && oldState)
-        //    this.ageGrid[i][j] = 0;
         if (newState) {
             if (age < 1)
                 this.ageGrid[i][j] = 1;
@@ -94,15 +84,31 @@ var LifeStateModel = (function () {
                     sum += this.getValueForNeighborAt(y, x);
             }
         }
+
+        //var neighbors: LifeCoordinates[] = this.getNeighborsOf(i, j);
+        //for (var x: number = 0; x < neighbors.length; x++) {
+        //    sum += this.getValueForNeighborAtCoords(neighbors[x]);
+        //}
         return sum;
     };
 
     LifeStateModel.prototype.getValueForNeighborAt = function (i, j) {
-        if (i < 0 || i >= this.height)
-            return 0;
+        if (LifeRules.getIsTorus()) {
+            if (i < 0)
+                i = this.height - 1;
+            else if (i >= this.height)
+                i = 0;
+            if (j < 0)
+                j = this.width - 1;
+            else if (j >= this.width)
+                j = 0;
+        } else {
+            if (i < 0 || i >= this.height)
+                return 0;
 
-        if (j < 0 || j >= this.width)
-            return 0;
+            if (j < 0 || j >= this.width)
+                return 0;
+        }
 
         if (this.getCurrState(i, j))
             return 1;
@@ -110,4 +116,8 @@ var LifeStateModel = (function () {
     };
     return LifeStateModel;
 })();
+//class LifeCoordinates {
+//    constructor(public i: number, public j: number) {
+//    }
+//}
 //# sourceMappingURL=LifeStateModel.js.map

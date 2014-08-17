@@ -63,6 +63,9 @@ function refreshRules() {
     LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
     LifeRules.setMinAge(Number(getValue('txtMinAge')));
     LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+
+    var chkIsTorus = document.getElementById('chkIsTorus');
+    LifeRules.setIsTorus(chkIsTorus.checked);
 }
 
 function refreshColors() {

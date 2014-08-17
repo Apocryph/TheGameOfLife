@@ -65,6 +65,9 @@ function refreshRules(): void {
     LifeRules.setMaxAge(Number(getValue('txtMaxAge')));
     LifeRules.setMinAge(Number(getValue('txtMinAge')));
     LifeRules.setLivingStartOdds(Number(getValue('txtStartingLiveOdds')));
+
+    var chkIsTorus: HTMLInputElement = <HTMLInputElement>document.getElementById('chkIsTorus');
+    LifeRules.setIsTorus(chkIsTorus.checked);
 }
 
 function refreshColors(): void {

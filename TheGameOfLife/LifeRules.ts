@@ -6,6 +6,7 @@ class LifeRules {
     private static maxAge: number;
     private static minAge: number;
     private static livingStartOdds: number;
+    private static isTorus: boolean;
 
     static setSurvivalBirthStates(inputString: string): void {
 
@@ -54,5 +55,13 @@ class LifeRules {
 
     static getLivingStartOdds(): number {
         return this.livingStartOdds;
+    }
+
+    static setIsTorus(newIsTorus: boolean): void {
+        this.isTorus = newIsTorus;
+    }
+
+    static getIsTorus(): boolean {
+        return this.isTorus;
     }
 }

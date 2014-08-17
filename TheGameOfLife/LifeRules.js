@@ -49,6 +49,14 @@ var LifeRules = (function () {
     LifeRules.getLivingStartOdds = function () {
         return this.livingStartOdds;
     };
+
+    LifeRules.setIsTorus = function (newIsTorus) {
+        this.isTorus = newIsTorus;
+    };
+
+    LifeRules.getIsTorus = function () {
+        return this.isTorus;
+    };
     return LifeRules;
 })();
 //# sourceMappingURL=LifeRules.js.map
